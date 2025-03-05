@@ -1,4 +1,4 @@
-import {buildSearchEngine, getOrganizationEndpoints} from '@coveo/headless';
+import {buildSearchEngine, getOrganizationEndpoint} from '@coveo/headless';
 
 const getEndpointToLocalServer = () => {
   if (!process.env.REACT_APP_SERVER_PORT) {
@@ -10,7 +10,8 @@ const getEndpointToLocalServer = () => {
 };
 
 const getTokenEndpoint = () => {
-  return process.env.REACT_APP_TOKEN_ENDPOINT || getEndpointToLocalServer();
+  return process.env.TOKEN_ENDPOINT || getEndpointToLocalServer();
+  //return process.env.REACT_APP_TOKEN_ENDPOINT || getEndpointToLocalServer();
 };
 
 export async function getSearchToken() {
@@ -22,7 +23,8 @@ export async function getSearchToken() {
 export async function initializeHeadlessEngine() {
   return buildSearchEngine({
     configuration: {
-      organizationEndpoints: getOrganizationEndpoints(
+      /*
+      organizationEndpoints: getOrganizationEndpoint(
         process.env.REACT_APP_ORGANIZATION_ID!,
         (process.env.REACT_APP_PLATFORM_ENVIRONMENT || 'prod') as
           | 'prod'
@@ -30,6 +32,7 @@ export async function initializeHeadlessEngine() {
           | 'stg'
           | 'dev'
       ),
+      */
       organizationId: process.env.REACT_APP_ORGANIZATION_ID!,
       accessToken: await getSearchToken(),
       renewAccessToken: getSearchToken,
