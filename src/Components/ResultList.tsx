@@ -80,23 +80,27 @@ const ResultListRenderer: FunctionComponent<ResultListProps> = (props) => {
     conditions: [],
     content: (result: Result) => (
       <ListItem disableGutters key={result.uniqueId}>
-        <Box my={2}>
-          <Box pb={1}>{ListItemLink(engine, result)}</Box>
+        <Box my={2} display="flex" alignItems="center">
+          <img alt="Artwork" src='https://img.pokemondb.net/artwork/pikachu.jpg' style={{ marginRight: '16px', width: '100px', height: 'auto' }}/>
 
-          {result.excerpt && (
-            <Box pb={1}>
-              <Typography color="textPrimary" variant="body2">
-                {result.excerpt}
-              </Typography>
-            </Box>
-          )}
+          <Box>
+            <Box pb={1}>{ListItemLink(engine, result)}</Box>
 
-          {result.raw.source && (
-            <FieldValue caption="Source" value={result.raw.source} />
-          )}
-          {result.raw.objecttype && (
-            <FieldValue caption="Object Type" value={result.raw.objecttype} />
-          )}
+            {result.excerpt && (
+              <Box pb={1}>
+                <Typography color="textPrimary" variant="body2">
+                  {result.excerpt}
+                </Typography>
+              </Box>
+            )}
+
+            {result.raw.source && (
+              <FieldValue caption="Source" value={result.raw.source} />
+            )}
+            {result.raw.objecttype && (
+              <FieldValue caption="Object Type" value={result.raw.objecttype} />
+            )}
+          </Box>
         </Box>
       </ListItem>
     ),
