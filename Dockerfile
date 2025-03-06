@@ -1,34 +1,59 @@
-# Step 1: Use an official Node.js image as the base
-FROM node:18-alpine AS build
+FROM node:18-alpine AS build-frontend
 
-# Step 2: Set the working directory inside the container
+# Set working directory for frontend build
 WORKDIR /app
 
 # Step 3: Copy package.json and package-lock.json (if available) to the container
 COPY package*.json ./
 
 # Step 4: Install dependencies
-RUN npm install
+RUN npm ci --prefer-offline --no-audit --progress=false
 
-# Step 5: Copy the rest of your application's source code to the container
-COPY . .
+# Step 5: Copy only the `src` folder and other required files
+COPY ./src ./src
+COPY ./public ./public
+COPY tsconfig.json ./
 
-# Step 6: Compile TypeScript to JavaScript
 RUN npm run build
 
-# Step 7: Use a smaller Node.js runtime image to run the application
+# Step 2: Build backend (Node.js server)
+FROM node:18-alpine AS build-backend
+
+# Set working directory for backend
+WORKDIR /server
+
+# Copy backend source code
+COPY ./server /server
+
+# Install backend dependencies
+RUN npm ci --prefer-offline --no-audit --progress=false
+#RUN npm install
+
+# Transpile TypeScript to JavaScript for the backend
+RUN npx tsc  # Make sure your tsconfig.json points to the correct output folder (e.g., dist)
+
+# Step 3: Create final image
 FROM node:18-alpine
 
-# Step 8: Set the working directory in the new image
+# Set working directory
 WORKDIR /app
 
-# Step 9: Copy the compiled output and node_modules from the build stage
-COPY --from=build /app/build ./dist
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package*.json ./
+# Copy the built frontend static files from the build-frontend stage
+COPY --from=build-frontend /app/build /app/public
 
-# Step 10: Expose the port your application runs on
+# Copy the compiled backend files from the build-backend stage
+COPY --from=build-backend /server/dist /server/dist
+
+# Install production dependencies for backend (if separate dependencies are needed)
+COPY ./server/package.json ./server/package-lock.json /server/
+WORKDIR /server
+RUN npm install --production
+
+# Expose the port your backend will run on
 EXPOSE 3000
 
-# Step 11: Define the command to run your application
-CMD ["node", "dist/App.js"]
+# Set environment variables (if necessary, for example, for the backend)
+ENV NODE_ENV=production
+
+# Start the backend server
+CMD ["node", "/server/dist/app.js"]  # Adjust if your entry file is named differently
