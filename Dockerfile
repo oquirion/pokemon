@@ -13,6 +13,7 @@ RUN npm ci --prefer-offline --no-audit --progress=false
 COPY ./src ./src
 COPY ./public ./public
 COPY tsconfig.json ./
+COPY .env ./
 
 RUN npm run build
 
@@ -56,7 +57,10 @@ EXPOSE 8080 3000
 
 # Set environment variables (if necessary, for example, for the backend)
 ENV NODE_ENV=production
+ENV ORGANIZATION_ID=olivierquirionpokemonchallengegz2hprx2
+ENV API_KEY=xxeae5698f-5f96-4aee-9570-652850853a16
+ENV USER_EMAIL=olivierquirion@gmail.com
 
 # Start the backend server
 #CMD ["node", "/server/dist/server.js"]
-CMD http-server /app/public -p 8080 & node /server/dist/server.js
+CMD http-server /app/public -p 8080 & node ./dist/server.js
