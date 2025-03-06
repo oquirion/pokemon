@@ -56,4 +56,4 @@ EXPOSE 3000
 ENV NODE_ENV=production
 
 # Start the backend server
-CMD ["node", "/server/dist/app.js"]  # Adjust if your entry file is named differently
+CMD ["node", "/server/dist/app.js"]
