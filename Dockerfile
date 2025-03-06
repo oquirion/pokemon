@@ -35,6 +35,8 @@ RUN npx tsc  # Make sure your tsconfig.json points to the correct output folder 
 # Step 3: Create final image
 FROM node:18-alpine
 
+RUN npm install -g http-server
+
 # Set working directory
 WORKDIR /app
 
@@ -50,10 +52,11 @@ WORKDIR /server
 RUN npm install --production
 
 # Expose the port your backend will run on
-EXPOSE 3000
+EXPOSE 8080 3000
 
 # Set environment variables (if necessary, for example, for the backend)
 ENV NODE_ENV=production
 
 # Start the backend server
-CMD ["node", "/server/dist/app.js"]
+#CMD ["node", "/server/dist/server.js"]
+CMD http-server /app/public -p 8080 & node /server/dist/server.js
