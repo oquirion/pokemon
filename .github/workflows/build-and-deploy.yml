@@ -92,5 +92,5 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster IacStack-cluster \
-            --service IacStack-MyFargateService8825BC17-uESYfqaVajSy \
+            --service IacStack-MyFargateService8825BC17-TUe5gVcbC3kv \
             --force-new-deployment
