@@ -10,8 +10,7 @@ const getEndpointToLocalServer = () => {
 };
 
 const getTokenEndpoint = () => {
-  return process.env.TOKEN_ENDPOINT || getEndpointToLocalServer();
-  //return process.env.REACT_APP_TOKEN_ENDPOINT || getEndpointToLocalServer();
+  return process.env.REACT_APP_TOKEN_ENDPOINT || getEndpointToLocalServer();
 };
 
 export async function getSearchToken() {
