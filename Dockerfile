@@ -63,4 +63,4 @@ ENV USER_EMAIL=olivierquirion@gmail.com
 
 # Start the backend server
 #CMD ["node", "/server/dist/server.js"]
-CMD http-server /app/public -p 8080 & node ./dist/server.js
+CMD http-server /app/public -p 8080 --fallback index.html & node ./dist/server.js

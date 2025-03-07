@@ -58,7 +58,6 @@ jobs:
         echo "REACT_APP_USER_EMAIL=${{ secrets.REACT_APP_USER_EMAIL }}" >> .env
         echo "REACT_APP_PLATFORM_ENVIRONMENT=${{ secrets.REACT_APP_PLATFORM_ENVIRONMENT }}" >> .env
         echo "REACT_APP_SERVER_PORT=${{ secrets.REACT_APP_SERVER_PORT }}" >> .env
-        echo "REACT_APP_TOKEN_ENDPOINT=${{ secrets.REACT_APP_TOKEN_ENDPOINT }}" >> .env
 
     # Step 3: Build the Docker image
     - name: Build the Docker image
@@ -91,6 +90,6 @@ jobs:
       - name: Force new ECS deployment
         run: |
           aws ecs update-service \
-            --cluster IacStack-cluster \
+            --cluster Pokemon-cluster \
             --service IacStack-MyFargateService8825BC17-TUe5gVcbC3kv \
             --force-new-deployment
