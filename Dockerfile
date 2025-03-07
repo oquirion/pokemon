@@ -36,7 +36,7 @@ RUN npx tsc  # Make sure your tsconfig.json points to the correct output folder 
 # Step 3: Create final image
 FROM node:18-alpine
 
-RUN npm install -g http-server
+RUN npm install -g serve
 
 # Set working directory
 WORKDIR /app
@@ -61,6 +61,5 @@ ENV ORGANIZATION_ID=olivierquirionpokemonchallengegz2hprx2
 ENV API_KEY=xxeae5698f-5f96-4aee-9570-652850853a16
 ENV USER_EMAIL=olivierquirion@gmail.com
 
-# Start the backend server
-#CMD ["node", "/server/dist/server.js"]
-CMD http-server /app/public -p 8080 --fallback index.html & node ./dist/server.js
+# Start the frontend + backend server
+CMD serve -s /app/public -l 8080 & node ./dist/server.js
