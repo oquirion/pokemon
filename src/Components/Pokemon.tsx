@@ -55,6 +55,7 @@ const PokemonCard: React.FC<IPokemonSearchProps> = (props) => {
 
   return (
     <div className="border p-4 rounded-md shadow-lg text-center">
+      <h2 className="text-xl font-bold capitalize">{uniqueId}</h2>
       <h2 className="text-xl font-bold capitalize">{pokemon.name}</h2>
       <img src={pokemon.sprite} alt={pokemon.name} className="mx-auto" />
       <p className="text-gray-600">Types: {pokemon.types.join(", ")}</p>
