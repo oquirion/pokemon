@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {SearchEngine} from '@coveo/headless';
+import { Card, CardContent, CardMedia, Typography, Container } from "@mui/material";
 
 interface IPokemonSearchProps {
   engine: SearchEngine;
@@ -8,8 +9,9 @@ interface IPokemonSearchProps {
 
 interface Pokemon {
   name: string;
-  sprite: string;
-  types: string[];
+  picture: string;
+  type: string;
+  raw: any;
 }
 
 const PokemonCard: React.FC<IPokemonSearchProps> = (props) => {
@@ -24,21 +26,30 @@ const PokemonCard: React.FC<IPokemonSearchProps> = (props) => {
         setLoading(true);
         setError(null);
 
-        //engine.executeFirstSearch();
+        const configuration = engine.state.configuration;
+        const response = await fetch(
+          `https://${configuration.organizationId}.org.coveo.com/rest/search/v2/document?organizationId=${configuration.organizationId}&uniqueId=${uniqueId}`,
+          {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${configuration.accessToken}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
 
-        /*
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${uniqueId.toLowerCase()}`);
         if (!response.ok) {
           throw new Error("Failed to fetch Pokemon");
         }
-        const data = await response.json();
         
+        const data = await response.json();
+
         setPokemon({
-          name: data.name,
-          sprite: data.sprites.front_default,
-          types: data.types.map((t: any) => t.type.name),
+          name: data.raw.filename,
+          picture: data.raw.pokemonpicture,
+          type: data.raw.pokemontype,
+          raw: data.raw,
         });
-        */
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -54,12 +65,33 @@ const PokemonCard: React.FC<IPokemonSearchProps> = (props) => {
   if (!pokemon) return null;
 
   return (
-    <div className="border p-4 rounded-md shadow-lg text-center">
-      <h2 className="text-xl font-bold capitalize">{uniqueId}</h2>
-      <h2 className="text-xl font-bold capitalize">{pokemon.name}</h2>
-      <img src={pokemon.sprite} alt={pokemon.name} className="mx-auto" />
-      <p className="text-gray-600">Types: {pokemon.types.join(", ")}</p>
-    </div>
+    <Container maxWidth="sm" style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+      <Card sx={{ maxWidth: 700, textAlign: "center", padding: 2 }}>
+        <CardMedia
+          component="img"
+          height="500"
+          width="100"
+          image={pokemon.picture}
+          alt={pokemon.name}
+          style={{ objectFit: 'none' }}
+        />
+        <CardContent>
+          <Typography variant="h5" gutterBottom>{pokemon.name.toUpperCase()}</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Type: {pokemon.type}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Original Uri: {pokemon.raw.uri}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Title: {pokemon.raw.title}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Source: {pokemon.raw.source}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Container>
   );
 };
 
