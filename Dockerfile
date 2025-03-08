@@ -57,6 +57,8 @@ EXPOSE 8080 3000
 
 # Set environment variables (if necessary, for example, for the backend)
 ENV NODE_ENV=production
+
+# TODO Find a way to reuse react (.env variable)
 ENV ORGANIZATION_ID=olivierquirionpokemonchallengegz2hprx2
 ENV API_KEY=xx53b8c154-032d-4246-9bce-01539394e314
 ENV USER_EMAIL=olivierquirion@gmail.com
