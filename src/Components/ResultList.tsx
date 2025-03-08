@@ -1,6 +1,6 @@
 import {FunctionComponent, useContext, useEffect, useState} from 'react';
 import List from '@mui/material/List';
-import {ListItem, Box, Typography} from '@mui/material';
+import {ListItem, Box, Typography, CardMedia} from '@mui/material';
 import {
   buildResultList,
   Result,
@@ -88,8 +88,13 @@ const ResultListRenderer: FunctionComponent<ResultListProps> = (props) => {
         <Box my={2} display="flex" alignItems="center">
           {(result.raw as PokemonRaw).pokemonpicture && (
             <a href={`/pokemon?uniqueId=${result.uniqueId}`}>
-            <img alt="Artwork" src={(result.raw as PokemonRaw).pokemonpicture} style={{ marginRight: '16px', width: '100px', height: 'auto' }}/>
-          </a>
+              <CardMedia
+              alt='artwork'
+              component="img"
+              style={{ marginRight: '16px', width: '100px', height: 'auto' }}
+              image={`${result.raw.pokemonpicture!}`}
+              />
+            </a>
           )}
           
           <Box>
