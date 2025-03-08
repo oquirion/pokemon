@@ -80,16 +80,6 @@ export class IacStack extends cdk.Stack {
         }),
         environment: {
           NODE_ENV: 'dev',  // Example environment variable
-          /*
-          REACT_APP_PLATFORM_URL: 'https://platform.cloud.coveo.com',
-          REACT_APP_ORGANIZATION_ID: 'olivierquirionpokemonchallengegz2hprx2',
-          REACT_APP_API_KEY: 'xxeae5698f-5f96-4aee-9570-652850853a16',
-          REACT_APP_USER_EMAIL: 'olivierquirion@gmail.com',
-          REACT_APP_PLATFORM_ENVIRONMENT: 'prod',
-          PORT: '3000',
-          REACT_APP_SERVER_PORT: '3001',
-          REACT_APP_TOKEN_ENDPOINT: 'https://olivierquirionpokemonchallengegz2hprx2.org.coveo.com/rest/search/v2/token?organizationId=olivierquirionpokemonchallengegz2hprx2'        
-*/
           },
       });
 
