@@ -15,13 +15,31 @@ export class IacStack extends cdk.Stack {
     const projectPrefix = "Pokemon"
 
     // Create VPC
-    const vpc = new ec2.Vpc(this, 'MyVpc');
+    const vpc = new ec2.Vpc(this, `${projectPrefix}-vpc`);
+
+    // Create a Security Group for ALB
+    const albSecurityGroup = new ec2.SecurityGroup(this, 'ALBSecurityGroup', {
+      vpc,
+      allowAllOutbound: true, // Ensures ALB can send traffic out
+    });
+
+    // Allow inbound HTTP traffic to ALB on port 80
+    albSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'Allow HTTP');
     
+    // Security Group for ECS Tasks
+    const ecsSecurityGroup = new ec2.SecurityGroup(this, 'ECSSecurityGroup', {
+      vpc,
+    });
+
+    // Allow ALB to send traffic to ECS on ports 8080 and 3000
+    ecsSecurityGroup.addIngressRule(albSecurityGroup, ec2.Port.tcp(8080), 'Allow ALB to reach ECS on 8080');
+    ecsSecurityGroup.addIngressRule(albSecurityGroup, ec2.Port.tcp(3000), 'Allow ALB to reach ECS on 3000');
+
     // Create an ECS Cluster
-      const cluster = new ecs.Cluster(this, 'MyEcsCluster', {
-        clusterName: `${id}-cluster`,
-        vpc: vpc
-      });
+    const cluster = new ecs.Cluster(this, 'MyEcsCluster', {
+      clusterName: `${projectPrefix}-cluster`,
+      vpc: vpc,
+    });
   
       /*
       new cdk.CfnOutput(this, 'EcsClusterName', {
@@ -42,7 +60,7 @@ export class IacStack extends cdk.Stack {
       });
 
       // Create a log group for container logs
-      const logGroup = new logs.LogGroup(this, 'MyAppLogGroup', {
+      const logGroup = new logs.LogGroup(this, `${projectPrefix}-LogGroup`, {
         retention: logs.RetentionDays.ONE_WEEK,  // You can configure the retention as needed
       });
 
@@ -77,47 +95,86 @@ export class IacStack extends cdk.Stack {
 
       // Optionally, map ports for the container (e.g., port 80)
       container.addPortMappings({
-        name: "nodejs",
+        name: "nodejs-port-3000",
         containerPort: 3000
+      },
+      {
+        name: "nginx-port-8080",
+        containerPort: 8080,
       });
 
       // Create an Application Load Balancer (ALB)
       const loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'MyALB', {
         vpc,
         internetFacing: true,
+        securityGroup: albSecurityGroup,
       });
+
+    // 👇 Target Group for Frontend (Nginx on 8080)
+    const frontendTargetGroup = new elbv2.ApplicationTargetGroup(
+      this,
+      "FrontendTG",
+      {
+        vpc,
+        protocol: elbv2.ApplicationProtocol.HTTP,
+        port: 8080,
+        targetType: elbv2.TargetType.IP,
+        healthCheck: { path: "/" },
+      }
+    );
+
+    // 👇 Target Group for Backend (Node.js on 3000)
+    const backendTargetGroup = new elbv2.ApplicationTargetGroup(
+      this,
+      "BackendTG",
+      {
+        vpc,
+        protocol: elbv2.ApplicationProtocol.HTTP,
+        port: 3000,
+        targetType: elbv2.TargetType.IP,
+        healthCheck: { path: "/token" },
+      }
+    );
 
       // Create a listener for the ALB
-      const listener = loadBalancer.addListener('MyListener', {
+      const httpListener  = loadBalancer.addListener('HttpListener', {
         port: 80,  // External port to listen on
         open: true,
+        defaultAction: elbv2.ListenerAction.forward([frontendTargetGroup]),
       });
 
-      // Create a target group for the Fargate service
-      const targetGroup = new elbv2.ApplicationTargetGroup(this, 'MyTargetGroup', {
-        vpc,
-        targetType: elbv2.TargetType.IP,  // Use IP target type for Fargate tasks
-        port: 3000,                       // Forward traffic to container's port 3000
-        protocol: elbv2.ApplicationProtocol.HTTP,
-        healthCheck: {
-          path: '/',                // Specify a health check endpoint
-          interval: cdk.Duration.seconds(30),
-        },
-      });
+    // 👇 Route API calls (/api/*) to Backend (Node.js on 3000)
+    httpListener.addAction("Route", {
+      priority: 1,
+      conditions: [elbv2.ListenerCondition.pathPatterns(["/token*"])],
+      action: elbv2.ListenerAction.forward([backendTargetGroup]),
+    });
 
-      // Add the target group to the ALB listener
-      listener.addTargetGroups('MyTarget', {
-        targetGroups: [targetGroup],
-      });
+    httpListener.addAction("RouteAllOther", {
+      priority: 100,
+      conditions: [elbv2.ListenerCondition.pathPatterns(["/*"])],
+      action: elbv2.ListenerAction.forward([frontendTargetGroup]),
+    });
 
-      // Create a Fargate service that uses the task definition and target group
-      const service = new ecs.FargateService(this, 'MyFargateService', {
-        cluster,
-        taskDefinition,
-        desiredCount: 1,  // Number of tasks to run
-      });
+    // Create a Fargate service that uses the task definition and target group
+    const service = new ecs.FargateService(this, 'MyFargateService', {
+      cluster,
+      taskDefinition,
+      desiredCount: 1,
+      securityGroups: [ecsSecurityGroup],
+    });
 
-      // Attach the Fargate service to the target group
-      targetGroup.addTarget(service);
+    service.node.addDependency(loadBalancer, ecsSecurityGroup, httpListener, frontendTargetGroup, backendTargetGroup);
+    
+    // Attach the ECS Service to Target Groups
+    frontendTargetGroup.addTarget(service.loadBalancerTarget({
+      containerName: `${projectPrefix}-Container`,
+      containerPort: 8080,
+    }));
+
+    backendTargetGroup.addTarget(service.loadBalancerTarget({
+      containerName: `${projectPrefix}-Container`,
+      containerPort: 3000,
+    }));
   }
 }

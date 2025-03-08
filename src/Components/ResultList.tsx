@@ -9,6 +9,7 @@ import {
   ResultList as HeadlessResultList,
   buildInteractiveResult,
   SearchEngine,
+  Raw,
 } from '@coveo/headless';
 import EngineContext from '../common/engineContext';
 
@@ -20,6 +21,10 @@ export function filterProtocol(uri: string) {
   const isRelative = /^(\/|\.\/|\.\.\/)/.test(uri);
 
   return isAbsolute || isRelative ? uri : '';
+}
+
+interface PokemonRaw extends Raw {
+  pokemonpicture: string;
 }
 
 interface FieldValueInterface {
@@ -81,8 +86,12 @@ const ResultListRenderer: FunctionComponent<ResultListProps> = (props) => {
     content: (result: Result) => (
       <ListItem disableGutters key={result.uniqueId}>
         <Box my={2} display="flex" alignItems="center">
-          <img alt="Artwork" src='https://img.pokemondb.net/artwork/pikachu.jpg' style={{ marginRight: '16px', width: '100px', height: 'auto' }}/>
-
+          {(result.raw as PokemonRaw).pokemonpicture && (
+            <a href={`/pokemon?uniqueId=${result.uniqueId}`}>
+            <img alt="Artwork" src={(result.raw as PokemonRaw).pokemonpicture} style={{ marginRight: '16px', width: '100px', height: 'auto' }}/>
+          </a>
+          )}
+          
           <Box>
             <Box pb={1}>{ListItemLink(engine, result)}</Box>
 
@@ -123,7 +132,11 @@ const ResultListRenderer: FunctionComponent<ResultListProps> = (props) => {
 
 const ResultList = () => {
   const engine = useContext(EngineContext)!;
-  const controller = buildResultList(engine);
+  const controller = buildResultList(engine,{
+    options: {
+      fieldsToInclude: ["pokemonpicture"],
+    },
+  });
   return <ResultListRenderer controller={controller} />;
 };
 

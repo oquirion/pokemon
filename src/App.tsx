@@ -1,6 +1,8 @@
 import React, {useEffect} from 'react';
+import { useSearchParams } from "react-router-dom";
 import SearchPage from './Components/SearchPage';
 import Hero from './Components/Hero';
+import Pokemon from './Components/Pokemon';
 import logo from './logo.svg';
 import coveologo from './coveologo.svg';
 import {
@@ -25,6 +27,7 @@ export default function App() {
         />
         <Route path="/home" element={<Home />} />
         <Route path="/error" element={<Error />} />
+        <Route path="/pokemon" element={<Resource />} />
       </Routes>
     </Router>
   );
@@ -97,4 +100,22 @@ const Error = () => {
       </Grid>
     </Box>
   );
+};
+
+const Resource = () => {
+  const [engine, setEngine] = React.useState<SearchEngine | null>(null);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    initializeHeadlessEngine().then((engine) => {
+      setEngine(engine);
+    });
+  }, []);
+
+  if (engine) {
+    const uniqueId : string = searchParams.get("uniqueId")!;
+    return <Pokemon engine={engine} uniqueId={uniqueId}/>;
+  } else {
+    return <div>Waiting for engine</div>;
+  }
 };
