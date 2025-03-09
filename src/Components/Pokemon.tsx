@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {SearchEngine} from '@coveo/headless';
+import { SearchEngine } from '@coveo/headless';
 import { Card, CardContent, CardMedia, Typography, Container } from "@mui/material";
 
 interface IPokemonSearchProps {
@@ -10,7 +10,7 @@ interface IPokemonSearchProps {
 interface Pokemon {
   name: string;
   picture: string;
-  type: string;
+  types: string[];
   raw: any;
 }
 
@@ -47,7 +47,7 @@ const PokemonCard: React.FC<IPokemonSearchProps> = (props) => {
         setPokemon({
           name: data.raw.filename,
           picture: data.raw.pokemonpicture,
-          type: data.raw.pokemontype,
+          types: data.raw.pokemontypes,
           raw: data.raw,
         });
       } catch (err) {
@@ -78,7 +78,7 @@ const PokemonCard: React.FC<IPokemonSearchProps> = (props) => {
         <CardContent>
           <Typography variant="h5" gutterBottom>{pokemon.name.toUpperCase()}</Typography>
           <Typography variant="body1" color="text.secondary">
-            Type: {pokemon.type}
+            Type(s): {pokemon.types.join(", ")}
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Original Uri: {pokemon.raw.uri}

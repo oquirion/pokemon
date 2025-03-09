@@ -7,7 +7,7 @@ const FacetList = () => {
     <Box>
       <Box px={1} pb={1}>
         <Typography variant="overline">Refine By</Typography>
-        <Facet field="pokemontype" title="Pokemon Type" />
+        <Facet field='pokemontypes' title="Pokemon Type" />
         <Facet field="pokemongeneration" title="Pokemon Generation" />
       </Box>
     </Box>
