@@ -3,6 +3,7 @@ import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import SearchBox from './SearchBox';
+import GeneratedAnswerCard from './GeneratedAnswerCard';
 import QuerySummary from './QuerySummary';
 import ResultList from './ResultList';
 import Pager from './Pager';
@@ -28,6 +29,9 @@ const SearchPage: React.FunctionComponent<ISearchPageProps> = (props) => {
         <Grid container justifyContent="center">
           <Grid item md={8}>
             <SearchBox />
+          </Grid>
+          <Grid item md={8}>
+            <GeneratedAnswerCard />
           </Grid>
         </Grid>
 
